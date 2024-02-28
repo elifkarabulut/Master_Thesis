@@ -58,10 +58,10 @@ if cone.size() != 48:
 #---ccCylinder01-begin
 tr3 = cc.ccGLMatrix()
 tr3.initFromParameters(0., (0., 0., 0.), (3.0, 0.0, 4.0))
-cylinder = cc.ccCylinder(0.5, 3.0, tr3, 'aCylinder', 48)
-if cylinder.getName() != 'aCylinder':
+mesh = cc.ccCylinder(0.5, 3.0, tr3, 'aCylinder', 48)
+if mesh.getName() != 'aCylinder':
     raise RuntimeError
-if cylinder.size() != 192:
+if mesh.size() != 192:
     raise RuntimeError
 #---ccCylinder01-end
 
@@ -116,22 +116,22 @@ if dish.size() != 2520:
 #---ccDish01-end
 
 #---C2M01-begin
-stats = cc.DistanceComputationTools.computeApproxCloud2MeshDistance(cloud, cylinder)
+stats = cc.DistanceComputationTools.computeApproxCloud2MeshDistance(cloud, mesh)
 print(stats) # min, max, mean, variance, error max
 #---C2M01-end
 
 #---C2M02-begin
 nbCpu = psutil.cpu_count()
-bestOctreeLevel = cc.DistanceComputationTools.determineBestOctreeLevel(cloud,cylinder)
+bestOctreeLevel = cc.DistanceComputationTools.determineBestOctreeLevel(cloud,mesh)
 params = cc.Cloud2MeshDistancesComputationParams()
 params.maxThreadCount = nbCpu
 params.octreeLevel = bestOctreeLevel
-cc.DistanceComputationTools.computeCloud2MeshDistances(cloud, cylinder, params)
+cc.DistanceComputationTools.computeCloud2MeshDistances(cloud, mesh, params)
 #---C2M02-end
 
-bestOctreeLevel = cc.DistanceComputationTools.determineBestOctreeLevel(cone.getAssociatedCloud(), sphere)
+bestOctreeLevel = cc.DistanceComputationTools.determineBestOctreeLevel(mesh.getAssociatedCloud(), cloud)
 params.octreeLevel = bestOctreeLevel
-cc.DistanceComputationTools.computeCloud2MeshDistances(cone.getAssociatedCloud(), sphere, params)
+cc.DistanceComputationTools.computeCloud2MeshDistances(mesh.getAssociatedCloud(), cloud, params)
 
 bestOctreeLevel = cc.DistanceComputationTools.determineBestOctreeLevel(dish.getAssociatedCloud(),None, box.getAssociatedCloud())
 params2 = cc.Cloud2CloudDistancesComputationParams()
@@ -139,16 +139,16 @@ params2.maxThreadCount = nbCpu
 params2.octreeLevel = bestOctreeLevel
 cc.DistanceComputationTools.computeCloud2CloudDistances(dish.getAssociatedCloud(), box.getAssociatedCloud(), params2)
 
-# --- compute split distances cloud - cylinder vertices
+# --- compute split distances cloud - mesh vertices
 
 #---C2C01-begin
 stats = cc.DistanceComputationTools.computeApproxCloud2CloudDistance(cloud,
-                                               cylinder.getAssociatedCloud())
+                                               mesh.getAssociatedCloud())
 print(stats) # min, max, mean, variance, error max
 
 nbCpu = psutil.cpu_count()
 bestOctreeLevel = cc.DistanceComputationTools.determineBestOctreeLevel(cloud,
-                                          None, cylinder.getAssociatedCloud())
+                                          None, mesh.getAssociatedCloud())
 params = cc.Cloud2CloudDistancesComputationParams()
 params.maxThreadCount = nbCpu
 params.octreeLevel = bestOctreeLevel
@@ -156,8 +156,8 @@ params.setSplitDistances(cloud.size()) # creates 3 scalar fields of cloud.size()
                                        # associated to the cloud on compute
 
 cc.DistanceComputationTools.computeCloud2CloudDistances(cloud, 
-                                 cylinder.getAssociatedCloud(), params)
+                                 mesh.getAssociatedCloud(), params)
 #---C2C01-end
 
-cc.SaveEntities([cloud, box, cone, cylinder, plane, sphere, torus, quadric, dish], os.path.join(dataDir, "entities2.bin"))
+cc.SaveEntities([cloud, box, cone, mesh, plane, sphere, torus, quadric, dish], os.path.join(dataDir, "entities2.bin"))
 
